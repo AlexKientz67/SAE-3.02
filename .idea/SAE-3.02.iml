@@ -7,4 +7,11 @@
     <orderEntry type="jdk" jdkName="Python 3.10 (SAE-3.02)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+<<<<<<< HEAD
+=======
+  <component name="PackageRequirementsSettings" />
+  <component name="PyDocumentationSettings" />
+  <component name="ReSTService" />
+  <component name="TestRunnerService" />
+>>>>>>> 7d4a2a69957300048eb60186caa5378566d27e05
 </module>

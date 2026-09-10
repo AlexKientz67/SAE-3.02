@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
 from PyQt6.QtGui import QColor, QBrush, QPen
@@ -39,3 +40,19 @@ if __name__ == '__main__':
     fenetre.show()
     """Lance la boucle d'exécution (pour que la fenêtre reste ouverte"""
     sys.exit(app.exec())
+=======
+import socket
+
+HOST = "127.0.0.1"
+PORT = 6000
+
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+client.connect((HOST, PORT))
+
+print("Connecté au serveur")
+
+client.send("Bonjour serveur, je suis le carrefour !".encode("utf-8"))
+
+client.close()
+>>>>>>> 7d4a2a69957300048eb60186caa5378566d27e05
