@@ -3,6 +3,8 @@ import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
 from PyQt6.QtGui import QColor, QBrush, QPen
 from PyQt6.QtCore import Qt, QTimer
+from car import Vehicule
+
 """
 Importations des libraries importantes.
 module sys = natif de python
@@ -61,6 +63,12 @@ class FenetreCarrefour(QMainWindow):
         manuellement pour initialiser les couleurs
         """
 
+        pinceau_voiture = QBrush(QColor("blue"))
+        self.voiture_dessin = self.scene.addRect(0, 0, 20, 40, stylo_sans_bordure, pinceau_voiture)
+        self.voiture_thread = Vehicule(340, 0)
+        self.voiture_thread.position_changee.connect(self.mettre_a_jour_voiture)
+        self.voiture_thread.start()
+
 
     """Fonction de Changement de Couleur"""
     def changer_feux(self):
@@ -100,6 +108,9 @@ class FenetreCarrefour(QMainWindow):
            Modulo de 4 permet de revenir a 0 après 3
            (0,1,2,3,0,1 ...)"""
         self.phase_feu = (self.phase_feu + 1) % 4
+
+    def mettre_a_jour_voiture(self, x, y):
+        self.voiture_dessin.setPos(x, y)
 
 if __name__ == '__main__':
     """l'instance de l'application (le moteur PyQt)"""
