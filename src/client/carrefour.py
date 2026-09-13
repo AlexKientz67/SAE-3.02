@@ -2,7 +2,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
 from PyQt6.QtGui import QColor, QBrush, QPen
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
 from car import Vehicule
 
 """
@@ -52,21 +52,14 @@ class FenetreCarrefour(QMainWindow):
         self.feu_gauche = self.scene.addEllipse(310, 440, 20, 20, stylo_sans_bordure, pinceau_rouge)
         self.feu_droite = self.scene.addEllipse(480, 340, 20, 20, stylo_sans_bordure, pinceau_rouge)
 
-        self.phase_feu = 0
-
-        self.timer_feux = QTimer(self)
-        self.timer_feux.timeout.connect(self.changer_feux)
-        self.timer_feux.start(2000)
-
-        self.changer_feux()
-        """On appelle la fonction une première fois
-        manuellement pour initialiser les couleurs
-        """
+        self.phase_feu = None
 
         pinceau_voiture = QBrush(QColor("blue"))
         self.voiture_dessin = self.scene.addRect(0, 0, 20, 40, stylo_sans_bordure, pinceau_voiture)
         self.voiture_thread = Vehicule(340, 0)
         self.voiture_thread.position_changee.connect(self.mettre_a_jour_voiture)
+        self.voiture_thread.etat_recu.connect(self.recevoir_etat)
+        self.voiture_thread.erreur.connect(self.afficher_erreur)
         self.voiture_thread.start()
 
 
@@ -75,6 +68,8 @@ class FenetreCarrefour(QMainWindow):
         pinceau_rouge = QBrush(QColor("red"))
         pinceau_orange = QBrush(QColor("orange"))
         pinceau_vert = QBrush(QColor("green"))
+        for feu in (self.feu_haut, self.feu_bas, self.feu_gauche, self.feu_droite):
+            feu.setBrush(pinceau_rouge)
 
         if self.phase_feu == 0:
             """ Phase 0 : L'axe Vertical passe au VERT,
@@ -104,15 +99,27 @@ class FenetreCarrefour(QMainWindow):
             self.feu_gauche.setBrush(pinceau_orange)
             self.feu_droite.setBrush(pinceau_orange)
 
-            """ A la fin on passe à la phase suivante
-           Modulo de 4 permet de revenir a 0 après 3
-           (0,1,2,3,0,1 ...)"""
-        self.phase_feu = (self.phase_feu + 1) % 4
+    def recevoir_etat(self, phase, direction):
+        self.phase_feu = phase
+        self.changer_feux()
+        horizontal = direction in ("gauche", "droite")
+        self.voiture_dessin.setRect(0, 0, 40 if horizontal else 20,
+                                   20 if horizontal else 40)
+
+    def afficher_erreur(self, message):
+        self.statusBar().showMessage("Connexion au serveur interrompue : " + message)
+        self.phase_feu = None
+        self.changer_feux()
+
+    def closeEvent(self, event):
+        self.voiture_thread.en_route = False
+        self.voiture_thread.wait()
+        super().closeEvent(event)
 
     def mettre_a_jour_voiture(self, x, y):
         self.voiture_dessin.setPos(x, y)
 
-if __name__ == '__main__':
+def main():
     """l'instance de l'application (le moteur PyQt)"""
     app = QApplication(sys.argv)
 
@@ -122,3 +129,7 @@ if __name__ == '__main__':
     fenetre.show()
     """Lance la boucle d'exécution (pour que la fenêtre reste ouverte"""
     sys.exit(app.exec())
+
+
+if __name__ == '__main__':
+    main()
