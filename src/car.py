@@ -1,12 +1,13 @@
 import socket
-from threading import Event, Thread
+from threading import Thread, Event
 
 
 class Vehicule(Thread):
-    def __init__(self, x_depart, y_depart):
+    def __init__(self, x, y, direction):
         super().__init__()
-        self.x = x_depart
-        self.y = y_depart
+        self.x = x
+        self.y = y
+        self.direction = direction
         self.vitesse = 3
         self.arret = Event()
 
@@ -14,16 +15,26 @@ class Vehicule(Thread):
         self.arret.set()
 
     def run(self):
-        # La voiture calcule sa position et l'envoie au serveur.
-        try:
-            with socket.create_connection(("127.0.0.1", 6000), timeout=2) as connexion:
-                while not self.arret.is_set():
-                    connexion.sendall(f"{self.x},{self.y}\n".encode("utf-8"))
-                    if self.arret.wait(0.05):
-                        break
-                    self.y += self.vitesse
-        except OSError as erreur:
-            print(f"Connexion au serveur impossible ou interrompue : {erreur}")
+        connexion = socket.create_connection(("127.0.0.1", 5500))
+
+        while not self.arret.is_set():
+            connexion.sendall(f"{self.x},{self.y}\n".encode())
+
+            if self.direction == "bas":
+                self.y += self.vitesse
+
+            elif self.direction == "haut":
+                self.y -= self.vitesse
+
+            elif self.direction == "droite":
+                self.x += self.vitesse
+
+            else:
+                self.x -= self.vitesse
+
+            self.arret.wait(0.05)
+
+        connexion.close()
 
 
 if __name__ == "__main__":

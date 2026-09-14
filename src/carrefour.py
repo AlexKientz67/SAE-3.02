@@ -1,9 +1,11 @@
 import sys
 import socket
+import random
 from PyQt6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView, QPushButton
 from PyQt6.QtGui import QColor, QBrush, QPen
 from PyQt6.QtCore import Qt, QTimer
 from car import Vehicule
+
 
 
 class FenetreCarrefour(QMainWindow):
@@ -56,7 +58,7 @@ class FenetreCarrefour(QMainWindow):
         self.bouton_generer.clicked.connect(self.generer_voiture)
         self.addToolBar("Véhicules").addWidget(self.bouton_generer)
 
-        self.connexion = socket.create_connection(("127.0.0.1", 6000))
+        self.connexion = socket.create_connection(("127.0.0.1", 5500))
         self.connexion.sendall(b"carrefour\n")
         self.connexion.setblocking(False)
 
@@ -92,14 +94,20 @@ class FenetreCarrefour(QMainWindow):
         self.phase_feu = (self.phase_feu + 1) % 4
 
     def generer_voiture(self):
-        self.vehicules = [v for v in self.vehicules if v.is_alive()]
+        direction = random.choice(["bas", "haut", "droite", "gauche"])
 
-        positions = [v.y for v in self.vehicules]
-        positions += [v.y() for v in self.voitures.values()]
+        if direction == "bas":
+            voiture = Vehicule(340, 0, direction)
 
-        y = int(min([60] + positions)) - 60
+        elif direction == "haut":
+            voiture = Vehicule(440, 800, direction)
 
-        voiture = Vehicule(340, y)
+        elif direction == "droite":
+            voiture = Vehicule(0, 440, direction)
+
+        else:
+            voiture = Vehicule(800, 340, direction)
+
         self.vehicules.append(voiture)
         voiture.start()
 

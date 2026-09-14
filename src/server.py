@@ -7,7 +7,7 @@ def lancer_serveur():
     id = 0
 
     serveur = socket.socket()
-    serveur.bind(("127.0.0.1", 6000))
+    serveur.bind(("127.0.0.1", 5500))
     serveur.listen()
 
     while True:
