@@ -16,7 +16,7 @@ class Vehicule(Thread):
     def run(self):
         # La voiture calcule sa position et l'envoie au serveur.
         try:
-            with socket.create_connection(("127.0.0.1", 5000), timeout=2) as connexion:
+            with socket.create_connection(("127.0.0.1", 6000), timeout=2) as connexion:
                 while not self.arret.is_set():
                     connexion.sendall(f"{self.x},{self.y}\n".encode("utf-8"))
                     if self.arret.wait(0.05):
