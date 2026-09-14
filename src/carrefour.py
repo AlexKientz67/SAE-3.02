@@ -1,6 +1,8 @@
 
 import sys
-from PyQt6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView
+import json
+import socket
+from PyQt6.QtWidgets import QApplication, QMainWindow, QGraphicsScene, QGraphicsView, QPushButton
 from PyQt6.QtGui import QColor, QBrush, QPen
 from PyQt6.QtCore import Qt, QTimer
 from car import Vehicule
@@ -63,11 +65,18 @@ class FenetreCarrefour(QMainWindow):
         manuellement pour initialiser les couleurs
         """
 
-        pinceau_voiture = QBrush(QColor("blue"))
-        self.voiture_dessin = self.scene.addRect(0, 0, 20, 40, stylo_sans_bordure, pinceau_voiture)
-        self.voiture_thread = Vehicule(340, 0)
-        self.voiture_thread.position_changee.connect(self.mettre_a_jour_voiture)
-        self.voiture_thread.start()
+        self.voitures = {}
+        self.vehicules = []
+        self.bouton_generer = QPushButton("Générer une voiture")
+        self.bouton_generer.clicked.connect(self.generer_voiture)
+        self.addToolBar("Véhicules").addWidget(self.bouton_generer)
+        self.connexion = socket.create_connection(("127.0.0.1", 5000), timeout=2)
+        self.connexion.sendall(b"carrefour\n")
+        self.connexion.setblocking(False)
+        self.tampon = b""
+        self.timer_reseau = QTimer(self)
+        self.timer_reseau.timeout.connect(self.recevoir_positions)
+        self.timer_reseau.start(20)
 
 
     """Fonction de Changement de Couleur"""
@@ -109,15 +118,76 @@ class FenetreCarrefour(QMainWindow):
            (0,1,2,3,0,1 ...)"""
         self.phase_feu = (self.phase_feu + 1) % 4
 
-    def mettre_a_jour_voiture(self, x, y):
-        self.voiture_dessin.setPos(x, y)
+    def generer_voiture(self):
+        self.vehicules = [v for v in self.vehicules if v.is_alive()]
+        # Garder un espace au départ, même lors de plusieurs clics rapides.
+        positions = [v.y for v in self.vehicules]
+        positions += [dessin.pos().y() for dessin in self.voitures.values()]
+        y_depart = int(min([60] + positions)) - 60
+        voiture = Vehicule(340, y_depart)
+        self.vehicules.append(voiture)
+        voiture.start()
+
+    def recevoir_positions(self):
+        # Lecture sans attente pour garder la fenêtre réactive.
+        try:
+            donnees = self.connexion.recv(4096)
+        except BlockingIOError:
+            return
+        except OSError:
+            donnees = b""
+        if not donnees:
+            self.bouton_generer.setEnabled(False)
+            for voiture in self.vehicules:
+                voiture.arreter()
+            self.timer_reseau.stop()
+            self.connexion.close()
+            for identifiant in list(self.voitures):
+                self.retirer_voiture(identifiant)
+            self.setWindowTitle("Carrefour — serveur déconnecté")
+            return
+        self.tampon += donnees
+        while b"\n" in self.tampon:
+            ligne, self.tampon = self.tampon.split(b"\n", 1)
+            message = json.loads(ligne)
+            if message["type"] == "position":
+                self.mettre_a_jour_voiture(message["id"], message["x"], message["y"])
+            elif message["type"] == "depart":
+                self.retirer_voiture(message["id"])
+
+    def closeEvent(self, event):
+        for voiture in self.vehicules:
+            voiture.arreter()
+        for voiture in self.vehicules:
+            voiture.join()
+        self.timer_reseau.stop()
+        self.connexion.close()
+        super().closeEvent(event)
+
+    def mettre_a_jour_voiture(self, identifiant, x, y):
+        if identifiant not in self.voitures:
+            couleurs = ["blue", "yellow", "cyan", "magenta"]
+            self.voitures[identifiant] = self.scene.addRect(
+                0, 0, 20, 40, QPen(Qt.PenStyle.NoPen),
+                QBrush(QColor(couleurs[identifiant % len(couleurs)]))
+            )
+        self.voitures[identifiant].setPos(x, y)
+
+    def retirer_voiture(self, identifiant):
+        dessin = self.voitures.pop(identifiant, None)
+        if dessin is not None:
+            self.scene.removeItem(dessin)
 
 if __name__ == '__main__':
     """l'instance de l'application (le moteur PyQt)"""
     app = QApplication(sys.argv)
 
     """Instancie la classe"""
-    fenetre = FenetreCarrefour()
+    try:
+        fenetre = FenetreCarrefour()
+    except OSError as erreur:
+        print(f"Connexion impossible : lancez d'abord src/server.py. {erreur}")
+        sys.exit(1)
 
     fenetre.show()
     """Lance la boucle d'exécution (pour que la fenêtre reste ouverte"""
