@@ -110,26 +110,20 @@ class FenetreCarrefour(QMainWindow):
             return
 
         if not message:
-            self.timer_reseau.stop()
-            self.connexion.close()
-
-            for voiture in self.vehicules:
-                voiture.arreter()
-
-            for identifiant in list(self.voitures):
-                self.retirer_voiture(identifiant)
-
-            self.setWindowTitle("Carrefour déconnecté")
             return
 
-        type, identifiant, x, y = message.split(",")
+        for ligne in message.split("\n"):
+            if not ligne:
+                continue
 
-        if type == "position":
-            self.mettre_a_jour_voiture(
-                int(identifiant),
-                int(x),
-                int(y)
-            )
+            type, identifiant, x, y = ligne.split(",")
+
+            if type == "position":
+                self.mettre_a_jour_voiture(
+                    int(identifiant),
+                    int(x),
+                    int(y)
+                )
 
     def mettre_a_jour_voiture(self, identifiant, x, y):
         if identifiant not in self.voitures:
