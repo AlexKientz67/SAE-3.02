@@ -2,6 +2,7 @@ import socket
 from threading import Thread, Event
 
 
+
 class Vehicule(Thread):
     def __init__(self, x, y, direction="bas"):
         super().__init__()

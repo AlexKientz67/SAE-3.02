@@ -22,12 +22,34 @@ print(f"Réponse du serveur : {data.decode()}")
 client.close()
 """
 
+def get_spawn_point_x(direction : str) -> int:
+    if direction == "bas":
+        return 340
+    elif direction == "haut":
+        return 440
+    elif direction == "droite":
+        return 0
+    elif direction == "gauche":
+        return 800
+
+def get_spawn_point_y(direction : str) -> int:
+    if direction == "bas":
+        return 0
+    elif direction == "haut":
+        return 800
+    elif direction == "droite":
+        return 440
+    elif direction == "gauche":
+        return 340
+
+
 class Vehicule():
-    def __init__(self, x, y, direction="bas"):
-        self.__x = x
-        self.__y = y
+    def __init__(self, direction="bas"):
+        self.__x = get_spawn_point_x(direction)
+        self.__y = get_spawn_point_y(direction)
         self.__direction = direction
         self.peut_avacer = 1
+        self.feu_passe = False
 
     def avancer(self):
         if self.__direction == "bas":
@@ -86,17 +108,44 @@ class Vehicule():
                     print("Feu :", feu)
 
                     sock.sendall(f"Vehicule {self.x}, {self.y}, {self.direction}\n".encode())
-                    time.sleep(0.2)
+                    time.sleep(0.005)
 
-                    if feu == "1":
-                        self.avancer()
+                    if self.direction == "bas":
+                        if self.y == 265 and feu != "1":
+                            print("stop")
+                        else:
+                            self.avancer()
+                        if self.y > 850:
+                            break
 
-                    if self.y > 800 or self.y < 0:
-                        break
+                    if self.direction == "haut":
+                        if self.y == 512 and feu != "1":
+                            print("stop")
+                        else:
+                            self.avancer()
+                        if self.y < -50:
+                            break
+
+                    if self.direction == "droite":
+                        if self.x == 270 and feu != "3":
+                            print("stop")
+                        else:
+                            self.avancer()
+                        if self.x > 850:
+                            break
+
+                    if self.direction == "gauche":
+                        if self.x == 510 and feu != "3":
+                            print("stop")
+                        else:
+                            self.avancer()
+                        if self.x < -50:
+                            break
+
 
 
 if __name__ == "__main__":
-    v1 = Vehicule(100, 50, "bas")
+    v1 = Vehicule("bas")
 
     v1.run()
 
