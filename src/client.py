@@ -148,4 +148,3 @@ if __name__ == "__main__":
     v1 = Vehicule("bas")
 
     v1.run()
-
