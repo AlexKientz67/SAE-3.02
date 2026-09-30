@@ -1,27 +1,8 @@
-from threading import Thread, Event
 import socket
 import time
-import random
 
 HOST = "127.0.0.1"
 PORT = 6000
-
-"""
-
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-client.connect((HOST, PORT))
-
-client.sendall(b"Bonjour\n")
-
-data = client.recv(1024)
-
-print(f"Réponse du serveur : {data.decode()}")
-
-
-
-client.close()
-"""
 
 
 def get_spawn_point_x(direction: str) -> int:
@@ -47,6 +28,7 @@ def get_spawn_point_y(direction: str) -> int:
 
 
 class Vehicule():
+
     def __init__(self, direction="bas"):
         self.__x = get_spawn_point_x(direction)
         self.__y = get_spawn_point_y(direction)
@@ -55,12 +37,16 @@ class Vehicule():
         self.feu_passe = False
 
     def avancer(self):
+
         if self.__direction == "bas":
             self.__y += 1
+
         elif self.__direction == "haut":
             self.__y -= 1
+
         elif self.__direction == "droite":
             self.__x += 1
+
         elif self.__direction == "gauche":
             self.__x -= 1
 
@@ -88,7 +74,9 @@ class Vehicule():
         return socket.create_connection((HOST, PORT))
 
     def test_connexion(self, sock: socket.socket) -> int:
+
         sock.sendall(b"PING\n")
+
         data = sock.recv(1024).decode().strip()
 
         if data == "OK":
@@ -99,80 +87,69 @@ class Vehicule():
             return 0
 
     def run(self):
+
         with self.create_connexion() as sock:
+
             if self.test_connexion(sock) == 1:
 
                 while True:
 
-                    sock.sendall(b"GET_FEU\n")
-
-                    data = sock.recv(1024).decode().strip()
-
-                    feu = data
-
-                    print("Feu :", feu)
+                    # --------------------------------
+                    # On envoie la position
+                    # --------------------------------
 
                     sock.sendall(
-                        f"Vehicule {self.x}, {self.y}, {self.direction}\n".encode()
+                        f"Urgence {self.x}, {self.y}, {self.direction}\n".encode()
                     )
+
+                    # --------------------------------
+                    # Réponse du serveur
+                    # --------------------------------
+
+                    collision = sock.recv(1024).decode().strip()
+
+                    if collision == "STOP":
+
+                        print("STOP - autre urgence")
+
+                        time.sleep(0.005)
+                        continue
+
+                    # --------------------------------
+                    # L'urgence avance toujours
+                    # --------------------------------
+
+                    self.avancer()
 
                     time.sleep(0.005)
 
+                    # --------------------------------
+                    # Sortie de la route
+                    # --------------------------------
+
                     if self.direction == "bas":
-                        if self.y == 265 and feu != "1":
-                            print("stop")
-                        else:
-                            self.avancer()
 
                         if self.y > 850:
                             break
 
-                    if self.direction == "haut":
-                        if self.y == 512 and feu != "1":
-                            print("stop")
-                        else:
-                            self.avancer()
+                    elif self.direction == "haut":
 
                         if self.y < -50:
                             break
 
-                    if self.direction == "droite":
-                        if self.x == 270 and feu != "3":
-                            print("stop")
-                        else:
-                            self.avancer()
+                    elif self.direction == "droite":
 
                         if self.x > 850:
                             break
 
-                    if self.direction == "gauche":
-                        if self.x == 510 and feu != "3":
-                            print("stop")
-                        else:
-                            self.avancer()
+                    elif self.direction == "gauche":
 
                         if self.x < -50:
                             break
 
 
-# AJOUT
-def creer_voiture():
-    direction = random.choice([
-        "bas",
-        "haut",
-        "droite",
-        "gauche"
-    ])
-
-    voiture = Vehicule(direction)
-
-    Thread(
-        target=voiture.run,
-        daemon=True
-    ).start()
-
-
 if __name__ == "__main__":
-    v1 = Vehicule("bas")
+
+    v1 = Vehicule("gauche")
 
     v1.run()

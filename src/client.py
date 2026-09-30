@@ -5,24 +5,8 @@ import time
 HOST = "127.0.0.1"
 PORT = 6000
 
-"""
 
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-client.connect((HOST, PORT))
-
-client.sendall(b"Bonjour\n")
-
-data = client.recv(1024)
-
-print(f"Réponse du serveur : {data.decode()}")
-
-
-
-client.close()
-"""
-
-def get_spawn_point_x(direction : str) -> int:
+def get_spawn_point_x(direction: str) -> int:
     if direction == "bas":
         return 340
     elif direction == "haut":
@@ -32,7 +16,8 @@ def get_spawn_point_x(direction : str) -> int:
     elif direction == "gauche":
         return 800
 
-def get_spawn_point_y(direction : str) -> int:
+
+def get_spawn_point_y(direction: str) -> int:
     if direction == "bas":
         return 0
     elif direction == "haut":
@@ -84,8 +69,9 @@ class Vehicule():
     def create_connexion(self) -> socket.socket:
         return socket.create_connection((HOST, PORT))
 
-    def test_connexion(self, sock : socket.socket) -> int:
+    def test_connexion(self, sock: socket.socket) -> int:
         sock.sendall(b"PING\n")
+
         data = sock.recv(1024).decode().strip()
 
         if data == "OK":
@@ -97,8 +83,12 @@ class Vehicule():
 
     def run(self):
         with self.create_connexion() as sock:
+
             if self.test_connexion(sock) == 1:
+
                 while True:
+
+                    # Récupération du feu
                     sock.sendall(b"GET_FEU\n")
 
                     data = sock.recv(1024).decode().strip()
@@ -107,44 +97,69 @@ class Vehicule():
 
                     print("Feu :", feu)
 
-                    sock.sendall(f"Vehicule {self.x}, {self.y}, {self.direction}\n".encode())
+                    # Envoi de la position au serveur
+                    sock.sendall(
+                        f"Vehicule {self.x}, {self.y}, {self.direction}\n".encode()
+                    )
+
+                    # Réponse du serveur concernant la collision
+                    collision = sock.recv(1024).decode().strip()
+
+                    if collision == "STOP":
+                        print("STOP - collision")
+
+                        time.sleep(0.005)
+                        continue
+
                     time.sleep(0.005)
 
+                    # -------------------------
+                    # FEU + DÉPLACEMENT
+                    # -------------------------
+
                     if self.direction == "bas":
+
                         if self.y == 265 and feu != "1":
                             print("stop")
                         else:
                             self.avancer()
+
                         if self.y > 850:
                             break
 
                     if self.direction == "haut":
+
                         if self.y == 512 and feu != "1":
                             print("stop")
                         else:
                             self.avancer()
+
                         if self.y < -50:
                             break
 
                     if self.direction == "droite":
+
                         if self.x == 270 and feu != "3":
                             print("stop")
                         else:
                             self.avancer()
+
                         if self.x > 850:
                             break
 
                     if self.direction == "gauche":
+
                         if self.x == 510 and feu != "3":
                             print("stop")
                         else:
                             self.avancer()
+
                         if self.x < -50:
                             break
 
 
-
 if __name__ == "__main__":
-    v1 = Vehicule("bas")
+
+    v1 = Vehicule("gauche")
 
     v1.run()

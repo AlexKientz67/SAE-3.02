@@ -155,6 +155,29 @@ class FenetreCarrefour(QMainWindow):
                     )
                 # Déplacer la voiture
                 self.voitures[numero].setPos(x, y)
+
+            elif message.startswith("Urgence"):
+                print("Véhicule d'urgence connecté ")
+                decoupage = message.split(",")
+
+                x = int(decoupage[0].split()[1])
+                y = int(decoupage[1])
+                direction = decoupage[2].strip()
+
+                print("Urgence", numero, ":", x, y, direction)
+
+                if numero not in self.voitures:
+                    self.voitures[numero] = self.scene.addRect(
+                        0,
+                        0,
+                        20,
+                        20,
+                        QPen(Qt.PenStyle.NoPen),
+                        QBrush(QColor("red"))
+                    )
+                # Déplacer la voiture
+                self.voitures[numero].setPos(x, y)
+
             elif message.startswith("deco"):
                 if numero in self.voitures:
                     voiture = self.voitures.pop(numero)
