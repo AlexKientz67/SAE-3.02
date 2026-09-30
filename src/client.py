@@ -94,9 +94,6 @@ class Vehicule():
                     data = sock.recv(1024).decode().strip()
 
                     feu = data
-
-                    print("Feu :", feu)
-
                     # Envoi de la position au serveur
                     sock.sendall(
                         f"Vehicule {self.x}, {self.y}, {self.direction}\n".encode()
@@ -106,8 +103,6 @@ class Vehicule():
                     collision = sock.recv(1024).decode().strip()
 
                     if collision == "STOP":
-                        print("STOP - collision")
-
                         time.sleep(0.005)
                         continue
 

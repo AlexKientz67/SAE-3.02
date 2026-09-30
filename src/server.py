@@ -1,5 +1,7 @@
 import socket
 from threading import Thread
+import time
+
 
 HOST = "0.0.0.0"
 PORT = 6000
@@ -50,8 +52,6 @@ def collision(nbr_voiture, message):
         positions_voitures[nbr_voiture] = (x, y)
 
     except Exception as e:
-
-        print("Erreur collision :", e)
         return True
 
     return False
@@ -63,7 +63,6 @@ def client_thread(client, nbr_voiture):
     global phase_feu
 
     while True:
-
         data = client.recv(1024)
 
         if not data:
@@ -81,8 +80,6 @@ def client_thread(client, nbr_voiture):
                 )
 
             break
-
-        #print(data.decode())
 
         message = data.decode().strip()
 
@@ -113,7 +110,6 @@ def client_thread(client, nbr_voiture):
             if message.startswith("Vehicule"):
                 # Vérification collision
                 if collision(nbr_voiture, message):
-                    print(f"Collision détectée avec la voiture {nbr_voiture}")
                     client.sendall(b"STOP\n")
                     continue
                 else:
@@ -131,7 +127,6 @@ def client_thread(client, nbr_voiture):
                     client.sendall(b"OK\n")
                 if carrefour is not None:
                     carrefour.sendall(f"{nbr_voiture}|{message}\n".encode())
-
 
 while True:
     client, address = server.accept()

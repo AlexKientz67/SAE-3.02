@@ -9,9 +9,13 @@ from PyQt6.QtGui import QColor, QBrush, QPen
 from PyQt6.QtCore import Qt, QTimer
 import socket
 
+import threading
+import random
+
 from PyQt6.QtWidgets import QPushButton, QGraphicsTextItem
 from PyQt6.QtGui import QFont
 from client import Vehicule
+from client_urgence import Vehicule_Urgence
 
 
 class FenetreCarrefour(QMainWindow):
@@ -133,10 +137,12 @@ class FenetreCarrefour(QMainWindow):
                 return
 
             message = data.decode().strip()
-            print(message)
 
             # Sépare le numéro du client du message
-            numero, message = message.split("|", 1)
+            try:
+                numero, message = message.split("|", 1)
+            except:
+                print("test")
 
             if message.startswith("Vehicule"):
 
@@ -145,8 +151,6 @@ class FenetreCarrefour(QMainWindow):
                 x = int(decoupage[0].split()[1])
                 y = int(decoupage[1])
                 direction = decoupage[2].strip()
-
-                print("Voiture", numero, ":", x, y, direction)
 
                 if numero not in self.voitures:
                     self.voitures[numero] = self.scene.addRect(
@@ -168,8 +172,6 @@ class FenetreCarrefour(QMainWindow):
                 y = int(decoupage[1])
                 direction = decoupage[2].strip()
 
-                print("Urgence", numero, ":", x, y, direction)
-
                 if numero not in self.voitures:
                     self.voitures[numero] = self.scene.addRect(
                         0,
@@ -186,8 +188,6 @@ class FenetreCarrefour(QMainWindow):
                 if numero in self.voitures:
                     voiture = self.voitures.pop(numero)
                     self.scene.removeItem(voiture)
-                    print("Voiture", numero, "supprimé")
-
         except BlockingIOError:
             pass
 
@@ -247,6 +247,7 @@ class FenetreCarrefour(QMainWindow):
     def basculer_urgence(self):
 
         self.etat_urgence = not self.etat_urgence
+        self.generer_voiture_urgence()
 
         if self.etat_urgence:
             self.panneau_urgence.show()
@@ -265,8 +266,6 @@ class FenetreCarrefour(QMainWindow):
             self.changer_feux()
 
     def generer_voiture(self):
-        import threading
-        import random
         directions_possibles = ["bas", "haut", "gauche", "droite"]
         direction_aleatoire = random.choice(directions_possibles)
         nouvelle_voiture = Vehicule(direction=direction_aleatoire)

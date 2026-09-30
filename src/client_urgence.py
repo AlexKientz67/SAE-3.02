@@ -27,7 +27,7 @@ def get_spawn_point_y(direction: str) -> int:
         return 340
 
 
-class Vehicule():
+class Vehicule_Urgence():
 
     def __init__(self, direction="bas"):
         self.__x = get_spawn_point_x(direction)
@@ -109,9 +109,6 @@ class Vehicule():
                     collision = sock.recv(1024).decode().strip()
 
                     if collision == "STOP":
-
-                        print("STOP - autre urgence")
-
                         time.sleep(0.005)
                         continue
 
