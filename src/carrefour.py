@@ -35,9 +35,7 @@ class FenetreCarrefour(QMainWindow):
         self.vue = QGraphicsView(self.scene)
         self.setCentralWidget(self.vue)
 
-        self.scene.setBackgroundBrush(
-            QBrush(QColor("white"))
-        )
+        self.scene.setBackgroundBrush(QBrush(QColor("#4CAF50")))
 
         # CO Serveur
         HOST = "127.0.0.1"
@@ -58,21 +56,37 @@ class FenetreCarrefour(QMainWindow):
         self.voitures = {}
 
 
-        # Routes
+
+        """LES ROUTES """
         route = QBrush(QColor(50, 50, 50))
         sans_bordure = QPen(Qt.PenStyle.NoPen)
 
-        self.scene.addRect(
-            330, 0, 140, 800,
-            sans_bordure,
-            route
-        )
+        """Route verticale et horizontale"""
+        self.scene.addRect(330, 0, 140, 800, sans_bordure, route)
+        self.scene.addRect(0, 330, 800, 140, sans_bordure, route)
 
-        self.scene.addRect(
-            0, 330, 800, 140,
-            sans_bordure,
-            route
-        )
+        """MARQUAGE AU SOL"""
+        stylo_ligne_discontinue = QPen(QColor("white"))
+        stylo_ligne_discontinue.setWidth(4)
+        stylo_ligne_discontinue.setStyle(Qt.PenStyle.DashLine)
+
+        """Lignes verticales (Haut et Bas) - Le centre est à x=400"""
+        self.scene.addLine(400, 0, 400, 330, stylo_ligne_discontinue)
+        self.scene.addLine(400, 470, 400, 800, stylo_ligne_discontinue)
+
+        """Lignes horizontales (Gauche et Droite) - Le centre est à y=400"""
+        self.scene.addLine(0, 400, 330, 400, stylo_ligne_discontinue)
+        self.scene.addLine(470, 400, 800, 400, stylo_ligne_discontinue)
+
+        """LIGNES D'ARRÊT (Lignes continus aux feux) """
+        stylo_ligne_arret = QPen(QColor("white"))
+        stylo_ligne_arret.setWidth(6)
+
+        """Lignes d'arrêt (Nord, Sud, Ouest, Est)"""
+        self.scene.addLine(330, 330, 400, 330, stylo_ligne_arret)
+        self.scene.addLine(400, 470, 470, 470, stylo_ligne_arret)
+        self.scene.addLine(330, 400, 330, 470, stylo_ligne_arret)
+        self.scene.addLine(470, 330, 470, 400, stylo_ligne_arret)
 
         # Feux
         self.feux = []
