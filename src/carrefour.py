@@ -8,7 +8,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QColor, QBrush, QPen
 from PyQt6.QtCore import Qt, QTimer
 import socket
-
+from PyQt6.QtMultimedia import QSoundEffect
+from PyQt6.QtCore import QUrl
 import threading
 import random
 
@@ -142,6 +143,12 @@ class FenetreCarrefour(QMainWindow):
         self.bouton_generer.clicked.connect(self.generer_voiture)
         self.addToolBar("Véhicules").addWidget(self.bouton_generer)
 
+        self.sirene = QSoundEffect()
+        self.sirene.setSource(QUrl.fromLocalFile("sirene.wav"))
+
+        self.sirene.setVolume(0.5)
+        self.sirene.setLoopCount(-2)
+
     def recevoir_serveur(self):
 
         try:
@@ -272,6 +279,8 @@ class FenetreCarrefour(QMainWindow):
 
             self.changer_feux()
 
+            self.sirene.play()
+
             nouvelle_ambulance = Ambulance(direction="bas")
             thread_ambu = threading.Thread(target=nouvelle_ambulance.run, daemon=True)
             thread_ambu.start()
@@ -283,6 +292,8 @@ class FenetreCarrefour(QMainWindow):
             self.sock.sendall(b"Urgence,OFF\n")
 
             self.changer_feux()
+
+            self.sirene.stop()
 
     def generer_voiture(self):
         directions_possibles = ["bas", "haut", "gauche", "droite"]
