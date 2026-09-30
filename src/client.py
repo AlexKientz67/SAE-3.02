@@ -1,6 +1,7 @@
 from threading import Thread, Event
 import socket
 import time
+from PyQt6.QtCore import QThread, pyqtSignal
 
 HOST = "127.0.0.1"
 PORT = 6000
@@ -108,7 +109,7 @@ class Vehicule():
                     print("Feu :", feu)
 
                     sock.sendall(f"Vehicule {self.x}, {self.y}, {self.direction}\n".encode())
-                    time.sleep(0.005)
+                    time.sleep(0.05)
 
                     if self.direction == "bas":
                         if self.y == 265 and feu != "1":

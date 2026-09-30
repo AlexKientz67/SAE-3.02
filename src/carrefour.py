@@ -11,6 +11,7 @@ import socket
 
 from PyQt6.QtWidgets import QPushButton, QGraphicsTextItem
 from PyQt6.QtGui import QFont
+from client import Vehicule
 
 
 class FenetreCarrefour(QMainWindow):
@@ -118,6 +119,10 @@ class FenetreCarrefour(QMainWindow):
 
         self.addToolBar("Urgence").addWidget(self.bouton_urgence)
 
+        self.bouton_generer = QPushButton("Générer une voiture")
+        self.bouton_generer.clicked.connect(self.generer_voiture)
+        self.addToolBar("Véhicules").addWidget(self.bouton_generer)
+
     def recevoir_serveur(self):
 
         try:
@@ -224,6 +229,15 @@ class FenetreCarrefour(QMainWindow):
             self.bouton_urgence.setText("Déclencher l'Urgence")
 
             self.sock.sendall(b"Urgence,OFF\n")
+
+    def generer_voiture(self):
+        import threading
+        import random
+        directions_possibles = ["bas", "haut", "gauche", "droite"]
+        direction_aleatoire = random.choice(directions_possibles)
+        nouvelle_voiture = Vehicule(direction=direction_aleatoire)
+        thread_voiture = threading.Thread(target=nouvelle_voiture.run, daemon=True)
+        thread_voiture.start()
 
 
 if __name__ == "__main__":
