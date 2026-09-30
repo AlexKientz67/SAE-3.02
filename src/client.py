@@ -1,6 +1,7 @@
 from threading import Thread, Event
 import socket
 import time
+import random
 
 HOST = "127.0.0.1"
 PORT = 6000
@@ -35,6 +36,10 @@ class Vehicule():
         self.__direction = direction
         self.peut_avacer = 1
         self.feu_passe = False
+
+        """La voiture peut choisir son itinéraire , cerveau"""
+        choix_trajet = ["tout_droit", "tourner_droite"]
+        self.action = random.choice(choix_trajet)
 
     def avancer(self):
         if self.__direction == "bas":
@@ -106,47 +111,57 @@ class Vehicule():
                         time.sleep(0.005)
                         continue
 
-                    time.sleep(0.005)
+                    time.sleep(0.05)
 
-                    # -------------------------
-                    # FEU + DÉPLACEMENT
-                    # -------------------------
 
                     if self.direction == "bas":
 
                         if self.y == 265 and feu != "1":
                             print("stop")
                         else:
+                            if self.action == "tourner_droite" and self.y == 340:
+                                self.__direction = "gauche"
+                                print("Je tourne à droite !")
+
                             self.avancer()
 
                         if self.y > 850:
                             break
 
-                    if self.direction == "haut":
+                    elif self.direction == "haut":
 
                         if self.y == 512 and feu != "1":
                             print("stop")
                         else:
+                            if self.action == "tourner_droite" and self.y == 440:
+                                self.__direction = "droite"
+                                print("Je tourne à droite !")
                             self.avancer()
 
                         if self.y < -50:
                             break
 
-                    if self.direction == "droite":
+                    elif self.direction == "droite":
 
                         if self.x == 270 and feu != "3":
                             print("stop")
                         else:
+                            if self.action == "tourner_droite" and self.x == 340:
+                                self.__direction = "bas"
+                                print("Je tourne à droite !")
                             self.avancer()
 
                         if self.x > 850:
                             break
 
-                    if self.direction == "gauche":
+                    elif self.direction == "gauche":
 
                         if self.x == 510 and feu != "3":
                             print("stop")
                         else:
+                            if self.action == "tourner_droite" and self.x == 440:
+                                self.__direction = "haut"
+                                print("Je tourne à droite !")
                             self.avancer()
 
                         if self.x < -50:
