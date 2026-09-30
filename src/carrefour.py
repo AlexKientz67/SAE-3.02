@@ -90,6 +90,7 @@ class FenetreCarrefour(QMainWindow):
 
         self.phase_feu = 0
 
+        self.etat_urgence = False
         # Timer des feux
         self.timer_feux = QTimer(self)
         self.timer_feux.timeout.connect(self.changer_feux)
@@ -97,9 +98,7 @@ class FenetreCarrefour(QMainWindow):
 
         self.changer_feux()
 
-        # bouton urgence
-        # Gestion de l'urgence
-        self.etat_urgence = False
+
 
         self.panneau_urgence = QGraphicsTextItem(
             "!!! URGENCE : SERREZ A DROITE !!!"
@@ -195,6 +194,14 @@ class FenetreCarrefour(QMainWindow):
 
     def changer_feux(self):
 
+        if self.etat_urgence:
+            pinceau_rouge = QBrush(QColor("red"))
+            for feu in self.feux:
+                feu.setBrush(pinceau_rouge)
+            """Comme 99(on l'envoie au serveur) tous les véhicules civils vont s'arrêter !"""
+            self.sock.sendall(b"phase-feu,99\n")
+            return
+
         if self.phase_feu == 0:
             vertical = "vert"
             horizontal = "rouge"
@@ -211,7 +218,7 @@ class FenetreCarrefour(QMainWindow):
             vertical = "rouge"
             horizontal = "orange"
 
-        # Les deux premiers feux sont verticaux
+        """Les deux premiers feux sont verticaux"""
         for i in range(4):
 
             if i < 2:
@@ -247,11 +254,15 @@ class FenetreCarrefour(QMainWindow):
 
             self.sock.sendall(b"Urgence,On\n")
 
+            self.changer_feux()
+
         else:
             self.panneau_urgence.hide()
             self.bouton_urgence.setText("Déclencher l'Urgence")
 
             self.sock.sendall(b"Urgence,OFF\n")
+
+            self.changer_feux()
 
     def generer_voiture(self):
         import threading
