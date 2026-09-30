@@ -94,17 +94,11 @@ class Vehicule_Urgence():
 
                 while True:
 
-                    # --------------------------------
-                    # On envoie la position
-                    # --------------------------------
 
                     sock.sendall(
                         f"Urgence {self.x}, {self.y}, {self.direction}\n".encode()
                     )
 
-                    # --------------------------------
-                    # Réponse du serveur
-                    # --------------------------------
 
                     collision = sock.recv(1024).decode().strip()
 
@@ -112,17 +106,10 @@ class Vehicule_Urgence():
                         time.sleep(0.005)
                         continue
 
-                    # --------------------------------
-                    # L'urgence avance toujours
-                    # --------------------------------
-
                     self.avancer()
 
                     time.sleep(0.005)
 
-                    # --------------------------------
-                    # Sortie de la route
-                    # --------------------------------
 
                     if self.direction == "bas":
 

@@ -12,6 +12,8 @@ import socket
 import threading
 import random
 
+from client_urgence import Vehicule_Urgence as Ambulance
+
 from PyQt6.QtWidgets import QPushButton, QGraphicsTextItem
 from PyQt6.QtGui import QFont
 from client import Vehicule
@@ -247,7 +249,6 @@ class FenetreCarrefour(QMainWindow):
     def basculer_urgence(self):
 
         self.etat_urgence = not self.etat_urgence
-        self.generer_voiture_urgence()
 
         if self.etat_urgence:
             self.panneau_urgence.show()
@@ -256,6 +257,10 @@ class FenetreCarrefour(QMainWindow):
             self.sock.sendall(b"Urgence,On\n")
 
             self.changer_feux()
+
+            nouvelle_ambulance = Ambulance(direction="bas")
+            thread_ambu = threading.Thread(target=nouvelle_ambulance.run, daemon=True)
+            thread_ambu.start()
 
         else:
             self.panneau_urgence.hide()
