@@ -111,17 +111,16 @@ class Vehicule():
                         time.sleep(0.005)
                         continue
 
-                    time.sleep(0.05)
+                    time.sleep(0.005)
 
 
                     if self.direction == "bas":
 
                         if self.y == 265 and feu != "1":
-                            print("stop")
+                            pass
                         else:
                             if self.action == "tourner_droite" and self.y == 340:
                                 self.__direction = "gauche"
-                                print("Je tourne à droite !")
 
                             self.avancer()
 
@@ -131,11 +130,10 @@ class Vehicule():
                     elif self.direction == "haut":
 
                         if self.y == 512 and feu != "1":
-                            print("stop")
+                            pass
                         else:
                             if self.action == "tourner_droite" and self.y == 440:
                                 self.__direction = "droite"
-                                print("Je tourne à droite !")
                             self.avancer()
 
                         if self.y < -50:
@@ -144,11 +142,10 @@ class Vehicule():
                     elif self.direction == "droite":
 
                         if self.x == 270 and feu != "3":
-                            print("stop")
+                            pass
                         else:
                             if self.action == "tourner_droite" and self.x == 340:
                                 self.__direction = "bas"
-                                print("Je tourne à droite !")
                             self.avancer()
 
                         if self.x > 850:
@@ -157,11 +154,10 @@ class Vehicule():
                     elif self.direction == "gauche":
 
                         if self.x == 510 and feu != "3":
-                            print("stop")
+                            pass
                         else:
                             if self.action == "tourner_droite" and self.x == 440:
                                 self.__direction = "haut"
-                                print("Je tourne à droite !")
                             self.avancer()
 
                         if self.x < -50:

@@ -92,45 +92,63 @@ class Vehicule_Urgence():
 
             if self.test_connexion(sock) == 1:
 
-                while True:
+                decalage = False
 
+                while True:
 
                     sock.sendall(
                         f"Urgence {self.x}, {self.y}, {self.direction}\n".encode()
                     )
 
-
                     collision = sock.recv(1024).decode().strip()
 
+                    # -------------------------
+                    # ÉVITEMENT
+                    # -------------------------
                     if collision == "STOP":
-                        time.sleep(0.005)
-                        continue
+                        decalage = True
 
-                    self.avancer()
+                    if decalage:
+
+                        # déplacement latéral progressif
+                        if self.direction == "bas" or self.direction == "haut":
+                            self.x += 1
+
+                            # une fois suffisamment décalé
+                            if self.x >= 360:
+                                decalage = False
+
+                        elif self.direction == "droite" or self.direction == "gauche":
+                            self.y += 1
+
+                            if self.y >= 460:
+                                decalage = False
+
+                    else:
+                        # déplacement normal
+                        self.avancer()
 
                     time.sleep(0.005)
 
+                    # -------------------------
+                    # FIN
+                    # -------------------------
 
                     if self.direction == "bas":
-
                         if self.y > 850:
                             break
 
                     elif self.direction == "haut":
-
                         if self.y < -50:
                             break
 
                     elif self.direction == "droite":
-
                         if self.x > 850:
                             break
 
                     elif self.direction == "gauche":
-
                         if self.x < -50:
                             break
-
 
 if __name__ == "__main__":
 
