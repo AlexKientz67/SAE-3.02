@@ -265,11 +265,6 @@ class FenetreCarrefour(QMainWindow):
                     self.timer_serveur.stop()
                     return
 
-                # --------------------------------------------------
-                # Plusieurs messages peuvent arriver dans un seul
-                # recv TCP.
-                # --------------------------------------------------
-
                 messages = data.decode().splitlines()
 
                 for message_complet in messages:
@@ -277,11 +272,6 @@ class FenetreCarrefour(QMainWindow):
                     if not message_complet:
                         continue
 
-                    # ------------------------------------------------
-                    # Format :
-                    #
-                    # numero|Vehicule x,y,direction
-                    # ------------------------------------------------
 
                     if "|" not in message_complet:
                         continue
@@ -290,10 +280,6 @@ class FenetreCarrefour(QMainWindow):
                         "|",
                         1
                     )
-
-                    # ==================================================
-                    # VEHICULE NORMAL
-                    # ==================================================
 
                     if message.startswith("Vehicule"):
 
@@ -314,7 +300,6 @@ class FenetreCarrefour(QMainWindow):
                         except ValueError:
                             continue
 
-                        # Création uniquement si nécessaire
                         if numero not in self.voitures:
 
                             self.voitures[numero] = (
@@ -337,10 +322,6 @@ class FenetreCarrefour(QMainWindow):
                             x,
                             y
                         )
-
-                    # ==================================================
-                    # VEHICULE D'URGENCE
-                    # ==================================================
 
                     elif message.startswith("Urgence"):
 
@@ -383,10 +364,6 @@ class FenetreCarrefour(QMainWindow):
                             x,
                             y
                         )
-
-                    # ==================================================
-                    # DECONNEXION
-                    # ==================================================
 
                     elif message.startswith("deco"):
 
@@ -436,16 +413,11 @@ class FenetreCarrefour(QMainWindow):
                     pinceau_rouge
                 )
 
-            # On garde ton protocole TCP
             self.sock.sendall(
                 b"phase-feu,99\n"
             )
 
             return
-
-        # ----------------------------------------------------------
-        # DÉTERMINATION DES FEUX
-        # ----------------------------------------------------------
 
         if self.phase_feu == 0:
 
@@ -466,10 +438,6 @@ class FenetreCarrefour(QMainWindow):
 
             vertical = "rouge"
             horizontal = "orange"
-
-        # ----------------------------------------------------------
-        # APPLICATION
-        # ----------------------------------------------------------
 
         couleurs = [
             vertical,
@@ -498,25 +466,13 @@ class FenetreCarrefour(QMainWindow):
                     QBrush(QColor("red"))
                 )
 
-        # ----------------------------------------------------------
-        # PROCHAINE PHASE
-        # ----------------------------------------------------------
-
         self.phase_feu = (
             self.phase_feu + 1
         ) % 4
 
-        # ----------------------------------------------------------
-        # TCP
-        # ----------------------------------------------------------
-
         self.sock.sendall(
             f"phase-feu,{self.phase_feu}\n".encode()
         )
-
-    # ==============================================================
-    # URGENCE
-    # ==============================================================
 
     def basculer_urgence(self):
 
@@ -566,10 +522,6 @@ class FenetreCarrefour(QMainWindow):
 
             self.sirene.stop()
 
-    # ==============================================================
-    # GÉNÉRATION VOITURE
-    # ==============================================================
-
     def generer_voiture(self):
 
         directions_possibles = [
@@ -594,10 +546,6 @@ class FenetreCarrefour(QMainWindow):
 
         thread_voiture.start()
 
-
-# ==============================================================
-# MAIN
-# ==============================================================
 
 if __name__ == "__main__":
 
