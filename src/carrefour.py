@@ -249,7 +249,7 @@ class FenetreCarrefour(QMainWindow):
             QUrl.fromLocalFile("sirene.wav")
         )
 
-        self.sirene.setVolume(0.5)
+        self.sirene.setVolume(0)
         self.sirene.setLoopCount(-2)
 
     # RÉCEPTION TCP
@@ -392,16 +392,7 @@ class FenetreCarrefour(QMainWindow):
                 )
                 break
 
-    # ==============================================================
-    # FEUX
-    # ==============================================================
-
     def changer_feux(self):
-
-        # ----------------------------------------------------------
-        # MODE URGENCE
-        # ----------------------------------------------------------
-
         if self.etat_urgence:
 
             pinceau_rouge = QBrush(

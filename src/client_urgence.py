@@ -101,10 +101,6 @@ class Vehicule_Urgence():
                     )
 
                     collision = sock.recv(1024).decode().strip()
-
-                    # -------------------------
-                    # ÉVITEMENT
-                    # -------------------------
                     if collision == "STOP":
                         decalage = True
 
@@ -129,10 +125,6 @@ class Vehicule_Urgence():
                         self.avancer()
 
                     time.sleep(0.005)
-
-                    # -------------------------
-                    # FIN
-                    # -------------------------
 
                     if self.direction == "bas":
                         if self.y > 850:
