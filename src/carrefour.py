@@ -2,6 +2,7 @@ import sys
 import socket
 import threading
 import random
+import carrefour_db
 
 from PyQt6.QtWidgets import (
     QApplication,
