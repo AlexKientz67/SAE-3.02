@@ -468,9 +468,13 @@ class FenetreCarrefour(QMainWindow):
 
     def basculer_urgence(self):
 
+        directionambu = random.choice(["bas", "haut", "gauche", "droite"])
+
         self.etat_urgence = not self.etat_urgence
 
         if self.etat_urgence:
+
+            carrefour_db.add_urgence(directionambu)
 
             self.panneau_urgence.show()
 
@@ -488,7 +492,7 @@ class FenetreCarrefour(QMainWindow):
 
             # Création ambulance
             nouvelle_ambulance = Ambulance(
-                direction="bas"
+                direction=directionambu
             )
 
             thread_ambu = threading.Thread(

@@ -1,39 +1,35 @@
-
 import mysql.connector
-from datetime import datetime
+
+DB_CONFIG = {
+    "host": "web-01.kzcloud.fr",
+    "user": "carrefour",
+    "password": "x*9l4IWGbaeq@hw3",
+    "database": "carrefour"
+}
 
 
-def add_urgence(direction: str, temps_passage: int):
+def add_urgence(direction: str):
 
     connection = None
     cursor = None
 
     try:
-        connection = mysql.connector.connect(
-            host="web-01.kzcloud.fr",
-            user="carrefour",
-            password="x*9l4IWGbaeq@hw3",
-            database="carrefour"
-        )
-
+        connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
         sql = """
-            INSERT INTO urgences (direction, temps_passage, date)
-            VALUES (%s, %s, %s)
+            INSERT INTO urgences (direction, date, heure)
+            VALUES (%s, CURDATE(), CURTIME())
         """
 
-        cursor.execute(sql, (direction, temps_passage, datetime.now()))
+        cursor.execute(sql, (direction,))
         connection.commit()
-
-        print(f"Urgence ajoutée ! ID : {cursor.lastrowid}")
-
-    except mysql.connector.Error as error:
-        print(f"Erreur MySQL : {error}")
+    except mysql.connector.Error as e:
+        print("Erreur MySQL :", e)
 
     finally:
-        if cursor is not None:
+        if cursor:
             cursor.close()
 
-        if connection is not None and connection.is_connected():
+        if connection:
             connection.close()

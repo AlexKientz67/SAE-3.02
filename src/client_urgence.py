@@ -104,21 +104,21 @@ class Vehicule_Urgence():
                     if collision == "STOP":
                         decalage = True
 
-                    if decalage:
 
-                        # déplacement latéral progressif
-                        if self.direction == "bas" or self.direction == "haut":
-                            self.x += 1
-
-                            # une fois suffisamment décalé
-                            if self.x >= 360:
-                                decalage = False
-
-                        elif self.direction == "droite" or self.direction == "gauche":
-                            self.y += 1
-
-                            if self.y >= 460:
-                                decalage = False
+                    # if decalage:
+                    #     # déplacement latéral progressif
+                    #     if self.direction == "bas" or self.direction == "haut":
+                    #         self.x += 1
+                    #
+                    #         # une fois suffisamment décalé
+                    #         if self.x >= 360:
+                    #             decalage = False
+                    #
+                    #     elif self.direction == "droite" or self.direction == "gauche":
+                    #         self.y += 1
+                    #
+                    #         if self.y >= 460:
+                    #             decalage = False
 
                     else:
                         # déplacement normal
