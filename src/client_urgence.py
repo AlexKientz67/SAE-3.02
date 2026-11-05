@@ -104,7 +104,6 @@ class Vehicule_Urgence():
                     if collision == "STOP":
                         decalage = True
 
-
                     # if decalage:
                     #     # déplacement latéral progressif
                     #     if self.direction == "bas" or self.direction == "haut":
