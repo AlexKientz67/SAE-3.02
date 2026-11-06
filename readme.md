@@ -1,34 +1,212 @@
-# Carrefour et véhicules
+# SAE 3.02 – Groupe ProxmoxVE
+**Réalisé par Alexandre KIENTZ et Illia SITOVSKYI**
 
-Prérequis : Python et PyQt6 (`python3 -m pip install PyQt6`).
-Depuis la racine du projet, lancer chaque programme dans un terminal séparé, dans cet ordre :
+## Installation
 
-```sh
-python3 src/server.py
+### Installation automatique
+
+**1. Installation de Git :**
+
+```bash
+sudo apt update
+sudo apt install git
 ```
 
-```sh
-python3 src/carrefour.py
+**2. Clonage du dépôt Git :**
+
+```bash
+git clone https://github.com/AlexKientz67/SAE-3.02.git
 ```
 
-Cliquer sur **Générer une voiture** dans le carrefour : chaque clic crée un véhicule
-dans son propre thread, avec sa propre connexion socket au serveur.
-Les véhicules générés s'arrêtent à la fermeture du carrefour.
-La direction de chaque voiture générée est choisie au hasard.
+### Sur votre machine serveur
 
-Il reste possible de lancer un véhicule séparément avec `python3 src/car.py`.
-Chaque véhicule calcule sa position et envoie `x,y,direction\n` au serveur TCP sur
-`127.0.0.1:5500` avec la bibliothèque Python `socket`.
-Le carrefour s'abonne au serveur en envoyant `carrefour\n` et reçoit les positions
-avec un identifiant par véhicule (`position,id,x,y,direction\n`).
-Il affiche un dessin distinct par véhicule et le retire à sa déconnexion.
-Le carrefour envoie aussi `feux,vertical,horizontal\n` au serveur.
-Le serveur gère seul les feux et les distances ; les véhicules proposent leur déplacement. Au rouge et à l’orange, ils attendent avant l’intersection ; une voiture déjà
-engagée poursuit sa route. Sans carrefour, les feux
-restent rouges. Les voitures horizontales sont dessinées en 40 × 20 pixels.
+Lancer le script d'installation côté serveur :
 
-Le serveur valide chaque position et répond `accord,x,y\n`.
-Il garde au moins 10 pixels entre les voitures, espace les créations et laisse
-finir les voitures engagées avant de faire entrer l’autre axe. Au rouge et à l’orange, le bord
-avant des voitures s’arrête 10 pixels avant le feu. Arrêter les programmes en terminal avec
-`Ctrl+C`. Si le serveur est redémarré, relancer le carrefour et les véhicules.
+```bash
+chmod +x ./install_server.sh
+sudo ./install_server.sh
+```
+
+### Sur votre machine cliente (carrefour)
+
+Lancer le script d'installation côté carrefour :
+
+```bash
+chmod +x ./install_carrefour.sh
+sudo ./install_carrefour.sh
+```
+
+---
+
+### Installation manuelle
+
+L'installation manuelle consiste à installer les dépendances nécessaires, à configurer l'environnement Python et, dans le cas du serveur, à créer et initialiser la base de données MariaDB.
+
+### Sur votre machine serveur
+
+**1. Mise à jour du système :**
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+**2. Installation des paquets nécessaires :**
+
+```bash
+sudo apt install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    python3-venv \
+    mariadb-server \
+    mariadb-client \
+    openssl
+```
+
+**3. Création de l'environnement virtuel Python :**
+
+Depuis la racine du projet, exécuter la commande suivante :
+
+```bash
+python3 -m venv venv
+```
+
+**4. Installation des dépendances Python :**
+
+Activer l'environnement virtuel, mettre à jour `pip`, puis installer les dépendances du projet :
+
+```bash
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+**5. Démarrage de MariaDB :**
+
+Activer et démarrer le service MariaDB :
+
+```bash
+sudo systemctl enable --now mariadb
+```
+
+**6. Création de la base de données et de l'utilisateur :**
+
+Ouvrir une console MariaDB :
+
+```bash
+sudo mariadb
+```
+
+Exécuter les commandes SQL suivantes :
+
+```sql
+CREATE DATABASE carrefour
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+CREATE USER 'carrefour'@'localhost'
+IDENTIFIED BY 'carrefour';
+
+CREATE USER 'carrefour'@'%'
+IDENTIFIED BY 'carrefour';
+
+GRANT ALL PRIVILEGES ON carrefour.* TO 'carrefour'@'localhost';
+GRANT ALL PRIVILEGES ON carrefour.* TO 'carrefour'@'%';
+
+FLUSH PRIVILEGES;
+
+EXIT;
+```
+
+**7. Importation de la structure et des données SQL :**
+
+Depuis la racine du projet, importer le fichier SQL :
+
+```bash
+sudo mariadb carrefour < src/urgences.sql
+```
+
+**8. Lancement du serveur :**
+
+Activer l'environnement virtuel, puis démarrer le serveur :
+
+```bash
+source venv/bin/activate
+python src/server.py
+```
+
+### Sur votre machine cliente (carrefour)
+
+**1. Mise à jour du système :**
+
+```bash
+sudo apt update
+sudo apt upgrade -y
+```
+
+**2. Installation des paquets nécessaires :**
+
+```bash
+sudo apt install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
+    python3-venv
+```
+
+**3. Création de l'environnement virtuel Python :**
+
+Depuis la racine du projet :
+
+```bash
+python3 -m venv venv
+```
+
+**4. Installation des dépendances Python :**
+
+Activer l'environnement virtuel, mettre à jour `pip`, puis installer les dépendances :
+
+```bash
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+**5. Lancement du carrefour :**
+
+```bash
+source venv/bin/activate
+python src/carrefour.py
+```
+
+---
+
+## Configuration
+
+Avant de procéder à la configuration, il est nécessaire de distinguer les deux machines (serveur et carrefour) et de relever leurs adresses IPv4 respectives.
+
+### Configuration du carrefour
+
+Sur la machine cliente, il faut modifier l'adresse IP du serveur dans les fichiers suivants :
+
+- `client.py`
+- `client_urgence.py`
+- `carrefour.py`
+
+À la ligne 6 de chaque fichier, remplacer :
+
+```python
+HOST = "127.0.0.1"
+```
+
+Par l'adresse IPv4 de votre machine serveur :
+
+```python
+HOST = "<Adresse IPv4 de votre serveur>"
+```
+
+### Configuration du serveur
+
+Aucune modification de la configuration du serveur n'est nécessaire si vous avez conservé les paramètres définis lors des étapes précédentes de l'installation.
+
