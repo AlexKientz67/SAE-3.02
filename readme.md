@@ -3,6 +3,13 @@
 
 ## Installation
 
+```bash
+su -
+apt install sudo
+sudo usermod -aG sudo toto
+exit
+```
+
 ### Installation automatique
 
 **1. Installation de Git :**
