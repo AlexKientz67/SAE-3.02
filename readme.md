@@ -9,6 +9,7 @@ apt install sudo
 sudo usermod -aG sudo toto
 exit
 ```
+Il faut peut-être redémarré la machine si le usermod ne s'applique pas.
 
 ### Installation automatique
 

@@ -8,7 +8,7 @@ DB_CONFIG = {
 }
 
 
-def add_urgence(direction: str):
+def add_urgence(direction: str, duree: int):
 
     connection = None
     cursor = None
@@ -18,24 +18,24 @@ def add_urgence(direction: str):
         cursor = connection.cursor()
 
         sql = """
-            INSERT INTO urgences (direction, date, heure)
-            VALUES (%s, CURDATE(), CURTIME())
+            INSERT INTO urgences (direction, duree, date, heure)
+            VALUES (%s, %s, CURDATE(), CURTIME())
         """
 
-        cursor.execute(sql, (direction,))
+        cursor.execute(sql, (direction, duree))
         connection.commit()
+
     except mysql.connector.Error as e:
         print("Erreur MySQL :", e)
 
     finally:
         if cursor:
             cursor.close()
-
         if connection:
             connection.close()
 
 
-def get_nombre_urgences():
+def get_stats():
 
     connection = None
     cursor = None
@@ -44,20 +44,25 @@ def get_nombre_urgences():
         connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
-        sql = "SELECT COUNT(*) FROM urgences"
+        cursor.execute("SELECT COUNT(*), AVG(duree), MAX(duree) FROM urgences")
+        resume = cursor.fetchone()
 
-        cursor.execute(sql)
-        resultat = cursor.fetchone()
+        cursor.execute("SELECT direction, COUNT(*) FROM urgences GROUP BY direction")
+        par_direction = cursor.fetchall()
 
-        return resultat[0]
+        cursor.execute(
+            "SELECT date, heure, direction, duree FROM urgences ORDER BY id DESC LIMIT 10"
+        )
+        dernieres = cursor.fetchall()
+
+        return resume, par_direction, dernieres
 
     except mysql.connector.Error as e:
         print("Erreur MySQL :", e)
-        return 0
+        return (0, 0, 0), [], []
 
     finally:
         if cursor:
             cursor.close()
-
         if connection:
             connection.close()

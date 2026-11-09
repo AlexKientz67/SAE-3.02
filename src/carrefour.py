@@ -3,6 +3,7 @@ import socket
 import threading
 import random
 import carrefour_db
+import time
 
 from PyQt6.QtWidgets import (
     QApplication,
@@ -10,7 +11,12 @@ from PyQt6.QtWidgets import (
     QGraphicsScene,
     QGraphicsView,
     QPushButton,
-    QGraphicsTextItem
+    QGraphicsTextItem,
+    QDialog,
+    QVBoxLayout,
+    QLabel,
+    QTableWidget,
+    QTableWidgetItem
 )
 
 from PyQt6.QtGui import (
@@ -31,7 +37,37 @@ from PyQt6.QtMultimedia import QSoundEffect
 from client import Vehicule
 from client_urgence import Vehicule_Urgence as Ambulance
 
+class FenetreStats(QDialog):
 
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Statistiques des urgences")
+        self.resize(480, 380)
+
+        resume, par_direction, dernieres = carrefour_db.get_stats()
+        nombre, moyenne, maxi = resume
+
+        disposition = QVBoxLayout()
+
+        disposition.addWidget(QLabel(f"Nombre total d'urgences : {nombre}"))
+        disposition.addWidget(QLabel(f"Durée moyenne : {float(moyenne or 0):.1f} s"))
+        disposition.addWidget(QLabel(f"Durée la plus longue : {maxi or 0} s"))
+
+        texte = " | ".join(f"{d} : {n}" for d, n in par_direction)
+        disposition.addWidget(QLabel(f"Par direction : {texte}"))
+
+        tableau = QTableWidget(len(dernieres), 4)
+        tableau.setHorizontalHeaderLabels(["Date", "Heure", "Direction", "Durée (s)"])
+
+        for i, ligne in enumerate(dernieres):
+            for j, valeur in enumerate(ligne):
+                tableau.setItem(i, j, QTableWidgetItem(str(valeur)))
+
+        disposition.addWidget(QLabel("10 dernières urgences :"))
+        disposition.addWidget(tableau)
+
+        self.setLayout(disposition)
 class FenetreCarrefour(QMainWindow):
 
     def __init__(self):
@@ -148,29 +184,40 @@ class FenetreCarrefour(QMainWindow):
 
         self.feux = []
 
+
         positions_feux = [
-            (340, 290),
-            (440, 480),
-            (310, 440),
-            (480, 340)
+            (296, 276),  # 0 - voie qui descend (nord)
+            (486, 476),  # 1 - voie qui monte   (sud)
+            (296, 476),  # 2 - voie qui va à droite (ouest)
+            (486, 276),  # 3 - voie qui va à gauche (est)
         ]
 
         for x, y in positions_feux:
 
-            feu = self.scene.addEllipse(
-                x,
-                y,
-                20,
-                20,
+
+            self.scene.addRect(
+                x, y, 18, 48,
                 sans_bordure,
-                QBrush(QColor("red"))
+                QBrush(QColor(30, 30, 30))
             )
 
-            self.feux.append(feu)
+
+            lampes = {}
+            for i, couleur in enumerate(["rouge", "orange", "vert"]):
+                lampes[couleur] = self.scene.addEllipse(
+                    x + 3, y + 3 + i * 15, 12, 12,
+                    sans_bordure,
+                    QBrush(QColor(60, 60, 60))
+                )
+
+            self.feux.append(lampes)
 
         self.phase_feu = 0
 
         self.etat_urgence = False
+        self.phase_evacuation = False
+        self.direction_ambu = "bas"
+        self.debut_urgence = None
 
         self.timer_serveur = QTimer(self)
 
@@ -191,7 +238,7 @@ class FenetreCarrefour(QMainWindow):
         self.changer_feux()
 
         self.panneau_urgence = QGraphicsTextItem(
-            "!!! URGENCE : SERREZ A DROITE !!!"
+            "!!! VEHICULE D’URGENCE EN CIRCULATION !!!"
         )
 
         police = QFont(
@@ -215,6 +262,15 @@ class FenetreCarrefour(QMainWindow):
         )
 
         self.panneau_urgence.hide()
+        self.chrono = QGraphicsTextItem("")
+        self.chrono.setFont(QFont("Arial", 13, QFont.Weight.Bold))
+        self.chrono.setDefaultTextColor(QColor("white"))
+        self.chrono.setPos(15, 15)
+        self.scene.addItem(self.chrono)
+        self.chrono.hide()
+
+        self.timer_chrono = QTimer(self)
+        self.timer_chrono.timeout.connect(self.maj_chrono)
 
         self.bouton_urgence = QPushButton(
             "Déclencher l'Urgence"
@@ -252,7 +308,9 @@ class FenetreCarrefour(QMainWindow):
 
         self.sirene.setVolume(0)
         self.sirene.setLoopCount(-2)
-
+        self.bouton_stats = QPushButton("Statistiques")
+        self.bouton_stats.clicked.connect(self.ouvrir_stats)
+        self.addToolBar("Stats").addWidget(self.bouton_stats)
     # RÉCEPTION TCP
     def recevoir_serveur(self):
 
@@ -392,23 +450,26 @@ class FenetreCarrefour(QMainWindow):
                     e
                 )
                 break
+    def allumer(self, lampes, couleur):
+
+        teintes = {
+            "rouge": "red",
+            "orange": "orange",
+            "vert": "lime"
+        }
+
+        for nom, lampe in lampes.items():
+            if nom == couleur:
+                lampe.setBrush(QBrush(QColor(teintes[nom])))
+            else:
+                lampe.setBrush(QBrush(QColor(60, 60, 60)))
 
     def changer_feux(self):
-        if self.etat_urgence:
-
-            pinceau_rouge = QBrush(
-                QColor("red")
-            )
-
-            for feu in self.feux:
-                feu.setBrush(
-                    pinceau_rouge
-                )
-
-            self.sock.sendall(
-                b"phase-feu,99\n"
-            )
-
+        if self.etat_urgence and self.phase_evacuation:
+            # Dégagement du carrefour : tous les feux au vert.
+            for lampes in self.feux:
+                self.allumer(lampes, "vert")
+            self.sock.sendall(b"phase-feu,98\n")
             return
 
         if self.phase_feu == 0:
@@ -443,20 +504,8 @@ class FenetreCarrefour(QMainWindow):
             couleurs
         ):
 
-            if couleur == "vert":
-                feu.setBrush(
-                    QBrush(QColor("green"))
-                )
-
-            elif couleur == "orange":
-                feu.setBrush(
-                    QBrush(QColor("orange"))
-                )
-
-            else:
-                feu.setBrush(
-                    QBrush(QColor("red"))
-                )
+            for lampes, couleur in zip(self.feux, couleurs):
+                self.allumer(lampes, couleur)
 
         self.phase_feu = (
             self.phase_feu + 1
@@ -468,57 +517,50 @@ class FenetreCarrefour(QMainWindow):
 
     def basculer_urgence(self):
 
-        directionambu = random.choice(["bas", "haut", "gauche", "droite"])
-
         self.etat_urgence = not self.etat_urgence
 
         if self.etat_urgence:
 
-            carrefour_db.add_urgence(directionambu)
+            self.direction_ambu = random.choice(["bas", "haut", "gauche", "droite"])
+            self.debut_urgence = time.time()
 
+            self.panneau_urgence.setPlainText("!!! URGENCE : DEGAGEZ LE CARREFOUR !!!")
             self.panneau_urgence.show()
 
-            self.bouton_urgence.setText(
-                "Fin de l'urgence"
-            )
+            self.chrono.show()
+            self.timer_chrono.start(200)
 
-            self.sock.sendall(
-                b"Urgence,On\n"
-            )
-
-            self.changer_feux()
-
+            self.bouton_urgence.setText("Fin de l'urgence")
             self.sirene.play()
 
-            # Création ambulance
-            nouvelle_ambulance = Ambulance(
-                direction=directionambu
-            )
+            # Phase de dégagement pendant 4 secondes.
+            self.phase_evacuation = True
+            self.changer_feux()
 
-            thread_ambu = threading.Thread(
-                target=nouvelle_ambulance.run,
-                daemon=True
-            )
-
-            thread_ambu.start()
+            QTimer.singleShot(4000, self.lancer_ambulance)
 
         else:
 
+            duree = 0
+            if self.debut_urgence is not None:
+                duree = int(time.time() - self.debut_urgence)
+
+            carrefour_db.add_urgence(self.direction_ambu, duree)
+
+            self.timer_chrono.stop()
+            self.chrono.hide()
             self.panneau_urgence.hide()
-
-            self.bouton_urgence.setText(
-                "Déclencher l'Urgence"
-            )
-
-            self.sock.sendall(
-                b"Urgence,OFF\n"
-            )
-
+            self.phase_evacuation = False
             self.changer_feux()
 
+            self.bouton_urgence.setText("Déclencher l'Urgence")
             self.sirene.stop()
-
+    def ouvrir_stats(self):
+        self.fenetre_stats = FenetreStats()
+        self.fenetre_stats.show()
     def generer_voiture(self):
+
+
 
         directions_possibles = [
             "bas",
@@ -541,6 +583,27 @@ class FenetreCarrefour(QMainWindow):
         )
 
         thread_voiture.start()
+
+    def lancer_ambulance(self):
+
+        if not self.etat_urgence:
+            return
+
+        self.phase_evacuation = False
+        self.changer_feux()
+
+        self.panneau_urgence.setPlainText("!!! VEHICULE D’URGENCE EN CIRCULATION !!!")
+
+        ambulance = Ambulance(direction=self.direction_ambu)
+        threading.Thread(target=ambulance.run, daemon=True).start()
+
+    def maj_chrono(self):
+
+        if self.debut_urgence is None:
+            return
+
+        duree = time.time() - self.debut_urgence
+        self.chrono.setPlainText(f"Urgence en cours : {duree:.1f} s")
 
 
 if __name__ == "__main__":

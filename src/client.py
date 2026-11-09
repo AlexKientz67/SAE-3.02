@@ -99,6 +99,7 @@ class Vehicule():
                     data = sock.recv(1024).decode().strip()
 
                     feu = data
+
                     # Envoi de la position au serveur
                     sock.sendall(
                         f"Vehicule {self.x}, {self.y}, {self.direction}\n".encode()
@@ -113,10 +114,9 @@ class Vehicule():
 
                     time.sleep(0.005)
 
-
                     if self.direction == "bas":
 
-                        if self.y == 265 and feu != "1":
+                        if self.y == 265 and feu != "1" and feu != "98":
                             pass
                         else:
                             if self.action == "tourner_droite" and self.y == 340:
@@ -129,7 +129,7 @@ class Vehicule():
 
                     elif self.direction == "haut":
 
-                        if self.y == 512 and feu != "1":
+                        if self.y == 512 and feu != "1" and feu != "98":
                             pass
                         else:
                             if self.action == "tourner_droite" and self.y == 440:
@@ -141,7 +141,7 @@ class Vehicule():
 
                     elif self.direction == "droite":
 
-                        if self.x == 270 and feu != "3":
+                        if self.x == 270 and feu != "3" and feu != "98":
                             pass
                         else:
                             if self.action == "tourner_droite" and self.x == 340:
@@ -153,7 +153,7 @@ class Vehicule():
 
                     elif self.direction == "gauche":
 
-                        if self.x == 510 and feu != "3":
+                        if self.x == 510 and feu != "3" and feu != "98":
                             pass
                         else:
                             if self.action == "tourner_droite" and self.x == 440:

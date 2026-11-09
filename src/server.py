@@ -120,10 +120,10 @@ def client_thread(client, nbr_voiture):
                     carrefour.sendall(f"{nbr_voiture}|{message}\n".encode())
 
             if message.startswith("Urgence"):
+                # Même contrôle de collision que pour les voitures normales.
                 if collision(nbr_voiture, message):
                     client.sendall(b"STOP\n")
                     continue
-
                 else:
                     client.sendall(b"OK\n")
                 if carrefour is not None:

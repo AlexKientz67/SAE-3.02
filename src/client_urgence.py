@@ -1,8 +1,6 @@
 import socket
 import time
 
-
-
 HOST = "127.0.0.1"
 PORT = 6000
 
@@ -103,27 +101,12 @@ class Vehicule_Urgence():
                     )
 
                     collision = sock.recv(1024).decode().strip()
+
                     if collision == "STOP":
-                        decalage = True
+                        time.sleep(0.005)
+                        continue
 
-                    # if decalage:
-                    #     # déplacement latéral progressif
-                    #     if self.direction == "bas" or self.direction == "haut":
-                    #         self.x += 1
-                    #
-                    #         # une fois suffisamment décalé
-                    #         if self.x >= 360:
-                    #             decalage = False
-                    #
-                    #     elif self.direction == "droite" or self.direction == "gauche":
-                    #         self.y += 1
-                    #
-                    #         if self.y >= 460:
-                    #             decalage = False
-
-                    else:
-                        # déplacement normal
-                        self.avancer()
+                    self.avancer()
 
                     time.sleep(0.005)
 
@@ -145,6 +128,6 @@ class Vehicule_Urgence():
 
 if __name__ == "__main__":
 
-    v1 = Vehicule("gauche")
+    v1 = Vehicule_Urgence("gauche")
 
     v1.run()
