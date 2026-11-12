@@ -9,6 +9,7 @@ DB_CONFIG = {
 
 
 def add_urgence(direction: str, duree: int):
+    """Enregistre la direction et la durée d’une urgence avec la date et l’heure actuelles."""
 
     connection = None
     cursor = None
