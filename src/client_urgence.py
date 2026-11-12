@@ -82,10 +82,8 @@ class Vehicule_Urgence():
         data = sock.recv(1024).decode().strip()
 
         if data == "OK":
-            print("Serveur disponible")
             return 1
         else:
-            print("Serveur indisponible...")
             return 0
 
     def run(self):

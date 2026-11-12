@@ -102,8 +102,6 @@ class FenetreCarrefour(QMainWindow):
         # On garde le TCP non bloquant
         self.sock.setblocking(False)
 
-        print("Connecté au serveur")
-
         self.voitures = {}
 
         route = QBrush(QColor(50, 50, 50))
@@ -440,7 +438,6 @@ class FenetreCarrefour(QMainWindow):
                 break
 
             except ConnectionResetError:
-                print("Connexion TCP fermée")
                 self.timer_serveur.stop()
                 return
 

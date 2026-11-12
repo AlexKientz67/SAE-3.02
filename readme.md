@@ -225,3 +225,20 @@ HOST = "<Adresse IPv4 de votre serveur>"
 
 Aucune modification de la configuration du serveur n'est nécessaire si vous avez conservé les paramètres définis lors des étapes précédentes de l'installation.
 
+## Lancement de l'application
+
+Pour lancer l'application il faut d'abord rentrer dans le venv python
+
+### Serveur
+```bash
+source venv/bin/activate
+python src/server.py
+```
+
+### Carrefour
+```bash
+source venv/bin/activate
+python src/carrefour.py
+```
+
+**Il faut lancer impérativement le serveur avant le carrefour !**

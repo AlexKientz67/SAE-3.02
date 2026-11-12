@@ -67,8 +67,6 @@ def client_thread(client, nbr_voiture):
 
         if not data:
 
-            print("close connection")
-
             # Supprime la voiture des positions
             if nbr_voiture in positions_voitures:
                 del positions_voitures[nbr_voiture]
@@ -90,8 +88,6 @@ def client_thread(client, nbr_voiture):
         elif message == "carrefour":
 
             carrefour = client
-
-            print("Carrefour registred")
 
         # PHASE DU FEU
         elif message.startswith("phase-feu"):
@@ -132,7 +128,6 @@ def client_thread(client, nbr_voiture):
 while True:
     client, address = server.accept()
     numero_voiture += 1
-    print("nouvelle_connexion :",address)
     Thread(
         target=client_thread,
         args=(client, numero_voiture)
