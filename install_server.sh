@@ -13,6 +13,8 @@ SQL_FILE="$SCRIPT_DIR/src/urgences.sql"
 REQUIREMENTS_FILE="$SCRIPT_DIR/requirements.txt"
 VENV_DIR="$SCRIPT_DIR/venv"
 
+MARIADB_CONFIG="/etc/mysql/mariadb.conf.d/50-server.cnf"
+
 # Vérification root
 if [ "$EUID" -ne 0 ]; then
     echo "Lance le script avec sudo."
@@ -53,6 +55,28 @@ echo "=== Installation des dépendances Python ==="
 
 echo "=== Démarrage de MariaDB ==="
 systemctl enable --now mariadb
+
+echo "=== Configuration de l'accès distant MariaDB ==="
+
+if [ ! -f "$MARIADB_CONFIG" ]; then
+    echo "Fichier de configuration introuvable : $MARIADB_CONFIG"
+    exit 1
+fi
+
+# Sauvegarde de la configuration
+cp "$MARIADB_CONFIG" "$MARIADB_CONFIG.bak"
+
+# Modification de bind-address
+if grep -qE '^[[:space:]]*bind-address[[:space:]]*=' "$MARIADB_CONFIG"; then
+    sed -i -E \
+        's/^[[:space:]]*bind-address[[:space:]]*=.*/bind-address = 0.0.0.0/' \
+        "$MARIADB_CONFIG"
+else
+    echo "bind-address = 0.0.0.0" >> "$MARIADB_CONFIG"
+fi
+
+echo "=== Redémarrage de MariaDB ==="
+systemctl restart mariadb
 
 echo "=== Création de la base et de l'utilisateur ==="
 

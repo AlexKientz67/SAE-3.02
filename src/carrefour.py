@@ -43,6 +43,7 @@ from client_urgence import Vehicule_Urgence as Ambulance
 class FenetreStats(QDialog):
 
     def __init__(self):
+        """Affiche le bilan des urgences et les dix dernières interventions."""
         super().__init__()
 
         self.setWindowTitle("Statistiques des urgences")
@@ -74,6 +75,7 @@ class FenetreStats(QDialog):
 class FenetreCarrefour(QMainWindow):
 
     def __init__(self):
+        """Initialise l’interface du carrefour, la connexion au serveur et les minuteries."""
         super().__init__()
 
         self.setWindowTitle("SAE 3.02 - ProxmoxVE")
@@ -311,6 +313,7 @@ class FenetreCarrefour(QMainWindow):
         self.addToolBar("Stats").addWidget(self.bouton_stats)
     # RÉCEPTION TCP
     def recevoir_serveur(self):
+        """Lit les messages du serveur pour afficher, déplacer ou retirer les véhicules."""
 
         while True:
 
@@ -448,6 +451,7 @@ class FenetreCarrefour(QMainWindow):
                 )
                 break
     def allumer(self, lampes, couleur):
+        """Allume la couleur choisie et éteint les autres lampes du feu."""
 
         teintes = {
             "rouge": "red",
@@ -462,6 +466,7 @@ class FenetreCarrefour(QMainWindow):
                 lampe.setBrush(QBrush(QColor(60, 60, 60)))
 
     def changer_feux(self):
+        """Actualise les feux selon le cycle normal ou l’évacuation et informe le serveur."""
         if self.etat_urgence and self.phase_evacuation:
             # Dégagement du carrefour : tous les feux au vert.
             for lampes in self.feux:
@@ -513,6 +518,7 @@ class FenetreCarrefour(QMainWindow):
         )
 
     def basculer_urgence(self):
+        """Déclenche l’évacuation avant l’ambulance ou termine l’urgence et enregistre sa durée."""
 
         self.etat_urgence = not self.etat_urgence
 
@@ -553,9 +559,11 @@ class FenetreCarrefour(QMainWindow):
             self.bouton_urgence.setText("Déclencher l'Urgence")
             self.sirene.stop()
     def ouvrir_stats(self):
+        """Ouvre la fenêtre des statistiques des urgences."""
         self.fenetre_stats = FenetreStats()
         self.fenetre_stats.show()
     def generer_voiture(self):
+        """Crée une voiture de direction aléatoire et démarre son déplacement dans un thread."""
 
 
 
@@ -582,6 +590,7 @@ class FenetreCarrefour(QMainWindow):
         thread_voiture.start()
 
     def lancer_ambulance(self):
+        """Termine l’évacuation et lance l’ambulance si l’urgence est toujours active."""
 
         if not self.etat_urgence:
             return
@@ -595,6 +604,7 @@ class FenetreCarrefour(QMainWindow):
         threading.Thread(target=ambulance.run, daemon=True).start()
 
     def maj_chrono(self):
+        """Actualise l’affichage du temps écoulé depuis le début de l’urgence."""
 
         if self.debut_urgence is None:
             return

@@ -85,6 +85,7 @@ class Vehicule():
             return 0
 
     def run(self):
+        """Gère le trajet du véhicule selon les feux et les collisions signalés par le serveur."""
         with self.create_connexion() as sock:
 
             if self.test_connexion(sock) == 1:

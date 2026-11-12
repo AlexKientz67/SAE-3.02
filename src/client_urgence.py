@@ -87,6 +87,7 @@ class Vehicule_Urgence():
             return 0
 
     def run(self):
+        """Fait avancer l’ambulance jusqu’à sa sortie en respectant les arrêts imposés par le serveur."""
 
         with self.create_connexion() as sock:
 

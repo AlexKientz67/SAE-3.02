@@ -223,7 +223,25 @@ HOST = "<Adresse IPv4 de votre serveur>"
 
 ### Configuration du serveur
 
-Aucune modification de la configuration du serveur n'est nécessaire si vous avez conservé les paramètres définis lors des étapes précédentes de l'installation.
+### Configuration de SQL
+**Ne pas faire si installation automatique**
+
+Il faut modifier la ligne `bind-adress` dans le fichier `50-server.cnf`, voici la procédure
+```bash
+sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+```
+Il faut remplacer
+```bash
+bind-address        = 127.0.0.1
+```
+par
+```bash
+bind-address        = 0.0.0.0
+```
+Puis redémarrer le service MySQL
+```bash
+sudo systemctl restart mysql
+```
 
 ## Lancement de l'application
 

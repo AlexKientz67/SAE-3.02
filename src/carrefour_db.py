@@ -36,6 +36,7 @@ def add_urgence(direction: str, duree: int):
 
 
 def get_stats():
+    """Récupère le bilan des urgences, leur répartition par direction et les dix dernières interventions."""
 
     connection = None
     cursor = None

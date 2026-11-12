@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : localhost:3306
--- Généré le : jeu. 05 nov. 2026 à 22:29
+-- Généré le : jeu. 12 nov. 2026 à 11:23
 -- Version du serveur : 10.11.19-MariaDB-0+deb12u1
 -- Version de PHP : 8.4.27
 
@@ -31,7 +31,8 @@ CREATE TABLE `urgences` (
   `id` int(255) NOT NULL,
   `direction` varchar(25) NOT NULL,
   `date` date NOT NULL,
-  `heure` time NOT NULL
+  `heure` time NOT NULL,
+  `duree` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 --
@@ -52,7 +53,7 @@ ALTER TABLE `urgences`
 -- AUTO_INCREMENT pour la table `urgences`
 --
 ALTER TABLE `urgences`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

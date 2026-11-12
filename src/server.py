@@ -24,6 +24,7 @@ phase_feu = 0
 positions_voitures = {}
 
 def collision(nbr_voiture, message):
+    """Vérifie les collisions et enregistre la position si elle est libre."""
 
     try:
         # Exemple :
@@ -58,6 +59,7 @@ def collision(nbr_voiture, message):
 
 
 def client_thread(client, nbr_voiture):
+    """Traite les messages du client et transmet les positions sans collision au carrefour."""
 
     global carrefour
     global phase_feu
