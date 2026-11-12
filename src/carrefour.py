@@ -5,6 +5,9 @@ import random
 import carrefour_db
 import time
 
+HOST = "127.0.0.1"
+PORT = 6000
+
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -85,9 +88,6 @@ class FenetreCarrefour(QMainWindow):
         self.scene.setBackgroundBrush(
             QBrush(QColor("#4CAF50"))
         )
-
-        HOST = "127.0.0.1"
-        PORT = 6000
 
         self.sock = socket.socket(
             socket.AF_INET,

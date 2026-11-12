@@ -11,8 +11,6 @@ exit
 ```
 Il faut peut-être redémarré la machine si le usermod ne s'applique pas.
 
-### Installation automatique
-
 **1. Installation de Git :**
 
 ```bash
@@ -24,7 +22,10 @@ sudo apt install git
 
 ```bash
 git clone https://github.com/AlexKientz67/SAE-3.02.git
+cd SAE-3.02
 ```
+
+## Installation automatique
 
 ### Sur votre machine serveur
 
@@ -44,9 +45,11 @@ chmod +x ./install_carrefour.sh
 sudo ./install_carrefour.sh
 ```
 
+Vous pouvez maintenant vous rendre à la fin du README, dans la section « Configuration ».
+
 ---
 
-### Installation manuelle
+## Installation manuelle
 
 L'installation manuelle consiste à installer les dépendances nécessaires, à configurer l'environnement Python et, dans le cas du serveur, à créer et initialiser la base de données MariaDB.
 
@@ -202,14 +205,18 @@ Sur la machine cliente, il faut modifier l'adresse IP du serveur dans les fichie
 - `client_urgence.py`
 - `carrefour.py`
 
-À la ligne 6 de chaque fichier, remplacer :
+Au début de ces fichiers, remplacer :
 
 ```python
 HOST = "127.0.0.1"
 ```
 
-Par l'adresse IPv4 de votre machine serveur :
+Pour retrouver l'adresse IPv4 de votre serveur
+```bash
+ip -4 addr
+```
 
+Et remplacer l'adresse du serveur par l'adresse de votre serveur
 ```python
 HOST = "<Adresse IPv4 de votre serveur>"
 ```
