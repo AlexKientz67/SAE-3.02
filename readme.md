@@ -197,29 +197,6 @@ python src/carrefour.py
 
 Avant de procéder à la configuration, il est nécessaire de distinguer les deux machines (serveur et carrefour) et de relever leurs adresses IPv4 respectives.
 
-### Configuration du carrefour
-
-Sur la machine cliente, il faut modifier l'adresse IP du serveur dans les fichiers suivants :
-
-- `client.py`
-- `client_urgence.py`
-- `carrefour.py`
-
-Au début de ces fichiers, remplacer :
-
-```python
-HOST = "127.0.0.1"
-```
-
-Pour retrouver l'adresse IPv4 de votre serveur
-```bash
-ip -4 addr
-```
-
-Et remplacer l'adresse du serveur par l'adresse de votre serveur
-```python
-HOST = "<Adresse IPv4 de votre serveur>"
-```
 
 ### Configuration du serveur
 
@@ -256,7 +233,7 @@ python src/server.py
 ### Carrefour
 ```bash
 source venv/bin/activate
-python src/carrefour.py
+python src/carrefour.py <IP du Serveur> <Port>
 ```
 
 **Il faut lancer impérativement le serveur avant le carrefour !**
