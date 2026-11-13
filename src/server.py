@@ -2,6 +2,15 @@ import socket
 from threading import Thread
 import time
 
+def get_ip_address():
+    """Retourne l'IP du serveur."""
+    try:
+        IP = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        IP.connect(("8.8.8.8", 80))
+        IP = IP.getsockname()[0]
+    except socket.error:
+        IP = "Echec de détection de l'IPv4, rechercher avec ip a ou vérifier votre configuration réseau."
+    return IP
 
 HOST = "0.0.0.0"
 PORT = 6000
@@ -14,8 +23,8 @@ server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 server.bind((HOST, PORT))
 server.listen()
 
-print(f"Serveur en écoute sur {HOST}:{PORT}")
-
+print("Le serveur est lancé.")
+print(f"Pour lancer le carrefour : python src/carrefour.py {get_ip_address()} {PORT}")
 
 carrefour = None
 numero_voiture = 0

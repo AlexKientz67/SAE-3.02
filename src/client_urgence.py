@@ -1,12 +1,6 @@
 import socket
 import time
 
-
-
-HOST = "127.0.0.1"
-PORT = 6000
-
-
 def get_spawn_point_x(direction: str) -> int:
     if direction == "bas":
         return 340
@@ -31,7 +25,9 @@ def get_spawn_point_y(direction: str) -> int:
 
 class Vehicule_Urgence():
 
-    def __init__(self, direction="bas"):
+    def __init__(self, direction="bas", *, host, port):
+        self.host = host
+        self.port = port
         self.__x = get_spawn_point_x(direction)
         self.__y = get_spawn_point_y(direction)
         self.__direction = direction
@@ -73,7 +69,7 @@ class Vehicule_Urgence():
         return self.__direction
 
     def create_connexion(self) -> socket.socket:
-        return socket.create_connection((HOST, PORT))
+        return socket.create_connection((self.host, self.port))
 
     def test_connexion(self, sock: socket.socket) -> int:
 
@@ -126,9 +122,3 @@ class Vehicule_Urgence():
                     elif self.direction == "gauche":
                         if self.x < -50:
                             break
-
-if __name__ == "__main__":
-
-    v1 = Vehicule_Urgence("gauche")
-
-    v1.run()

@@ -5,9 +5,6 @@ import random
 import carrefour_db
 import time
 
-HOST = "127.0.0.1"
-PORT = 6000
-
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -579,7 +576,7 @@ class FenetreCarrefour(QMainWindow):
         )
 
         nouvelle_voiture = Vehicule(
-            direction=direction_aleatoire
+            direction=direction_aleatoire, host=HOST, port=PORT
         )
 
         thread_voiture = threading.Thread(
@@ -600,7 +597,7 @@ class FenetreCarrefour(QMainWindow):
 
         self.panneau_urgence.setPlainText("!!! VEHICULE D’URGENCE EN CIRCULATION !!!")
 
-        ambulance = Ambulance(direction=self.direction_ambu)
+        ambulance = Ambulance(direction=self.direction_ambu, host=HOST, port=PORT)
         threading.Thread(target=ambulance.run, daemon=True).start()
 
     def maj_chrono(self):
@@ -612,8 +609,15 @@ class FenetreCarrefour(QMainWindow):
         duree = time.time() - self.debut_urgence
         self.chrono.setPlainText(f"Urgence en cours : {duree:.1f} s")
 
-
 if __name__ == "__main__":
+
+    if len(sys.argv) < 3:
+        print("La syntaxe de la commande est : python src/carrefour.py <IP du Serveur> <Port>")
+        print("Les informations sont affichées sur le serveur.")
+        sys.exit(1)
+
+    HOST = sys.argv[1]
+    PORT = int(sys.argv[2])
 
     app = QApplication(sys.argv)
 
